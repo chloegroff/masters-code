@@ -106,7 +106,7 @@ def get_imgs(img_files: str, hls: bool = True, mask: bool = False, resolution: l
 
 
 
-model_num = 8
+model_num = 10
 model = rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}.keras'
 
 dim = 224
@@ -171,7 +171,7 @@ for i in range(len(image_files)):
 
         #plt.show()
 
-    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_example_{index}.pdf', dpi =300)
+    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_val_{index + 1}.pdf', dpi =300)
 
     ground_truth = np.array(np.reshape(masks[index], (224,224,1)))
     #ground_truth = masks[i]

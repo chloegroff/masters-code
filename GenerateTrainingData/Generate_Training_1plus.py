@@ -36,18 +36,17 @@ def generate_training(
         if i[:-4] in mask_stamps:
             masked_imgs.append(i)
     
-    # Zips images and masks then randomly shuffles list
     zip_files = list(zip(masked_imgs, mask_files))
     print(f"Len zip files: {len(zip_files)}")
     # shuffle(zip_files)
 
     # Loops through all masked images unitl either length of list is reached or desired prop of total normal images saved to dir
     index = 0
-    #pbar = tqdm(total=num_images)
+    pbar = tqdm(total=num_images)
     
     
-    for i in range(int(num_images*prop_normal)):
-        if i >= len(zip_files) - 1:
+    for i in range(len(zip_files)):
+        if index >= num_images*prop_normal:
             break
 
         # Loads image and mask
@@ -71,10 +70,10 @@ def generate_training(
             cv2.imwrite(save_path + sep +  f'{index}_' + zip_files[i][0].split(sep)[-1][:-4] + '_i.tif', img)
             cv2.imwrite(save_path + sep + f'{index}_' + zip_files[i][1].split(sep)[-1], mask)
             index += 1
-            #pbar.update(1)
+            pbar.update(1)
 
 
-    print('num training images with 0.1% white: ', index)
+    #print('num training images with 0.1% white: ', index)
     # Loops until desired number of images reached
     while index < num_images:
         flag = False
@@ -156,14 +155,14 @@ def generate_training(
         cv2.imwrite(save_path + sep + f'{index}_' + im_file.split(sep)[-1][:-4] + '_i.tif', img)
         cv2.imwrite(save_path + sep + f'{index}_' + mask_file.split(sep)[-1], mask)
         
-        #pbar.update(1)
+        pbar.update(1)
         index += 1
-    #pbar.close()
+    pbar.close()
 
 if __name__ == '__main__':
     generate_training(image_path = r'C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks', 
                       save_path = r'C:\Users\chloe\DE4\Masters\Dataset\Training_Data_1plus', 
-                      num_images = 153,
+                      num_images = 299,
                       resolution = (224,224), 
                       prop_normal = 1, prop_rot = 0.5, prop_crop = 0.5, prop_zoom = 0, prop_warp = 0.5,
                       area_ratio = 0.01)
