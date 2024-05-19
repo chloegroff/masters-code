@@ -14,9 +14,10 @@ print(len(masks))
 
 for i, mask_path in enumerate(masks):
         # Find associated image with mask
-        mask_name = os.path.relpath(masks, image_folder)
-        image_array = mask_name.split('_')[:6]
-        image_name = image_array.join('_') + '.jpg'
+        mask_name = os.path.relpath(mask_path, image_folder)
+        image_array = np.array(mask_name.split('_')[:6])
+        image_name = '_'.join(image_array) + '.jpg'
+        #image_name = np.core.defchararray.join('_', image_array) + '.jpg'
         # Read the image and mask pair
         mask = cv2.imread(mask_path)
         img = cv2.imread(os.path.join(image_folder, image_name))
@@ -24,7 +25,7 @@ for i, mask_path in enumerate(masks):
         if np.sum(mask)/255/mask.size > 0.01:
             index += 1
             cv2.imwrite(os.path.join(save_folder, image_name), img)
-            cv2.imwrite(os.path.join(save_folder, image_name), img)
+            cv2.imwrite(os.path.join(save_folder, mask_name), mask)
 
 print(index)
 

@@ -10,10 +10,11 @@ from numpy.random import random
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import pickle as pkl
+from scipy.ndimage import gaussian_filter
 
 def generate_training(
         image_path: str, save_path: str, num_images: int, resolution: tuple[int, int], prop_normal: float,
-        prop_rot: float, prop_crop: float, prop_zoom: float, 
+        prop_rot: float, prop_crop: float, prop_zoom: float, prop_warp: float, area_ratio: float,
         zoom_range: tuple[int, int] = (0.5, 3), crop_range: tuple[int, int] = [0.1, 0.6]
         ):
     
@@ -37,7 +38,8 @@ def generate_training(
     
     # Zips images and masks then randomly shuffles list
     zip_files = list(zip(masked_imgs, mask_files))
-    shuffle(zip_files)
+    print(f"Len zip files: {len(zip_files)}")
+    # shuffle(zip_files)
 
     # Loops through all masked images unitl either length of list is reached or desired prop of total normal images saved to dir
     index = 0
@@ -49,15 +51,20 @@ def generate_training(
             break
 
         # Loads image and mask
-        img = cv2.imread(zip_files[i][0])[:,500:-600]
-        mask = cv2.imread(zip_files[i][1], 0)[:,500:-600]
+        
+        img = cv2.imread(zip_files[i][0])
+        mask = cv2.imread(zip_files[i][1], 0)
+        if np.size(img, 1) == 2464:
+            img = img[:,500:-600]
+            mask = mask[:,500:-600]
 
         # Scales to desired size
         scales = [resolution[0]/(img.shape[0]),resolution[1]/(img.shape[1]), 1]
         img = zoom(img, scales)
         mask = zoom(mask, [scales[0], scales[1]])
 
-        if np.sum(mask)/255/mask.size >= 0.0 and np.sum(mask)/255/mask.size <= 0.01:
+
+        if np.sum(mask/255)/mask.size > area_ratio:
             mask = np.where(mask > 128, 255,0)
             mask = np.array(mask, dtype=np.uint8)
             # saves mask and image
@@ -66,8 +73,8 @@ def generate_training(
             index += 1
             #pbar.update(1)
 
-        continue
-    print('num training images with less than 1% white: ', index)
+
+    print('num training images with 0.1% white: ', index)
     # Loops until desired number of images reached
     while index < num_images:
         flag = False
@@ -77,10 +84,10 @@ def generate_training(
             
             # selects random image and mask and loads
             im_file, mask_file = choice(zip_files)      
-            img = cv2.imread(im_file)[:,550:-600]
-            mask = cv2.imread(mask_file, 0)[:,550:-600]
+            img = cv2.imread(im_file)#[:,550:-600]
+            mask = cv2.imread(mask_file, 0)#[:,550:-600]
 
-            if np.sum(mask)/255/mask.size >= 0.0 and np.sum(mask)/255/mask.size <= 0.01:
+            if np.sum(mask)/255/mask.size > area_ratio:
                 # Rescales to resolution
                 scales = [resolution[0]/(img.shape[0]),resolution[1]/(img.shape[1]), 1]
                 img = zoom(img, scales)
@@ -109,9 +116,6 @@ def generate_training(
                     img[:int(cut*img.shape[0])] = fill_color
                     mask[:int(cut*img.shape[0])] = 0
                     flag = True
-
-
-
                 
                 # rotates image
                 if prop_rot > random():
@@ -120,9 +124,29 @@ def generate_training(
                     mask = rotate(mask, angle, reshape= False , prefilter= True)
                     flag = True
 
-                # if np.sum(mask)/255/mask.size < 0.0:
-                #     flag = False
+                
 
+                # warps image
+                if prop_warp > random():
+
+                    scale = np.random.randint(5,10)
+                    sh = img.shape
+                    
+                    yy, xx = np.indices(resolution)
+                    t = np.random.normal(size = resolution)
+
+                    dx = scale * gaussian_filter(t, resolution[0]/np.random.randint(10, 20), order=(0,1))
+                    dy = scale * gaussian_filter(t, resolution[1]/np.random.randint(10, 20), order=(1,0))
+                    dx *= scale/dx.max()
+                    dy *= scale/dy.max()
+
+                    xmap = (xx-dx).astype(np.float32)
+                    ymap = (yy-dy).astype(np.float32)
+                    img = cv2.remap(img, xmap, ymap, cv2.INTER_LINEAR)
+                    mask = cv2.remap(mask, xmap, ymap, cv2.INTER_LINEAR)
+
+                if np.sum(mask/255)/mask.size <= area_ratio:
+                    flag = False
 
         # Sets mask to binary
         mask = np.where(mask > 128, 255,0)
@@ -138,8 +162,9 @@ def generate_training(
 
 if __name__ == '__main__':
     generate_training(image_path = r'C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks', 
-                      save_path = r'C:\Users\chloe\DE4\Masters\Dataset\Training_Data_small_nothing', 
-                      num_images = 250, 
+                      save_path = r'C:\Users\chloe\DE4\Masters\Dataset\Training_Data_1plus', 
+                      num_images = 153,
                       resolution = (224,224), 
-                      prop_normal = 1, prop_rot = 0.5, prop_crop = 0.5, prop_zoom = 0)
+                      prop_normal = 1, prop_rot = 0.5, prop_crop = 0.5, prop_zoom = 0, prop_warp = 0.5,
+                      area_ratio = 0.01)
 
