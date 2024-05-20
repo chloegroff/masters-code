@@ -65,13 +65,16 @@ image_files = glob.glob(val_image + sep +  '*_i.tif')
 mask_files = glob.glob(val_image + sep + '*_s.tif')
 
 # Define model numbers to compare
-models = [8,9,10]
+models = [10,8,9,11]
 # Create a string of model numbers seperated by '_' e.g. '8_9_10'
-models_str = ''
-for i in range(len(models)-1):
-    models_str = models_str + str(models[i]) + '_'
-models.str = models_str + str(models[-1])
-print(models_str)
+# models_str = ''
+# for i in range(len(models)-1):
+#     models_str = models_str + str(models[i]) + '_'
+# models.str = models_str + str(models[-1])
+# print(models_str)
+
+number = 1
+long_img = True
 
 predictions = []
 
@@ -96,10 +99,15 @@ matplotlib.rcParams.update({'font.size': 12, "font.family": "Times New Roman"})
 
 # Loops through each validation image in folder
 for k, mask in enumerate(masks):
+    if long_img == True:
+        fig, axes = plt.subplots(ncols = len(models) + 1, nrows = 1)
+        fig.set_figwidth(7.2)
+        fig.set_figheight(3.6)
+    else:
+        fig, axes = plt.subplots(ncols = 2, nrows = 3)
+        fig.set_figwidth(3.6)
+        fig.set_figheight(3.6)
 
-    fig, axes = plt.subplots(ncols = 2, nrows = 2)
-    fig.set_figwidth(3.6)
-    fig.set_figheight(3.6)
 
     axes = axes.flatten()
 
@@ -128,8 +136,8 @@ for k, mask in enumerate(masks):
             axes[a].spines[b].set_visible(False)
 
         #plt.show()
-
-    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\Mask_{k}_compare_{models_str}.pdf', dpi =300)
+    fig.tight_layout()
+    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\Mask_{k}_compare_{number}.pdf', dpi =300)
 
     #ground_truth = np.array(np.reshape(mask[index], (224,224,1)))
     #ground_truth = masks[i]
