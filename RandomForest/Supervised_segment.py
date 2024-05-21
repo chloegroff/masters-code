@@ -41,7 +41,7 @@ def predict_mask(
     for i in files:
         img = cv2.imread(i)
 
-        img = cv2.cvtColor(img, cv2.COLOR_BRG2HLS)
+        #img = cv2.cvtColor(img, cv2.COLOR_BRG2HLS)
 
         feats = feature_func(img)
 
@@ -126,17 +126,18 @@ if __name__ == '__main__':
     clf = future.fit_segmenter(long_mask, features, clf)
     result = future.predict_segmenter(features, clf)
 
+
     with open('Trained_Classifier.pkl', 'wb') as f:
         pkl.dump(clf, f)
 
     fg_img = cv2.imread('Full Growth.jpg')
-    fg_img=cv2.cvtColor(fg_img,cv2.COLOR_BGR2HLS)
+    #fg_img=cv2.cvtColor(fg_img,cv2.COLOR_BGR2HLS)
 
     fg_feats = features_func(fg_img)
     fg_result =  future.predict_segmenter(fg_feats, clf)
 
     sg_img = cv2.imread('Smol Growth.jpg')
-    sg_img=cv2.cvtColor(sg_img,cv2.COLOR_BGR2HLS)
+    #sg_img=cv2.cvtColor(sg_img,cv2.COLOR_BGR2HLS)
 
     sg_feats = features_func(sg_img)
     sg_result =  future.predict_segmenter(sg_feats, clf)
