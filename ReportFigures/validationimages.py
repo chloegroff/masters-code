@@ -106,7 +106,7 @@ def get_imgs(img_files: str, hls: bool = True, mask: bool = False, resolution: l
 
 
 
-model_num = 10
+model_num = 12
 model = rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}.keras'
 
 dim = 224
@@ -123,7 +123,7 @@ mask_files = glob.glob(val_image + sep + '*_s.tif')
 
 loaded_model = keras.models.load_model(model, compile=False)
 
-images = get_imgs(image_files, hls = False)
+images = get_imgs(image_files, hls = True)
 plt.imshow(images[0])
 plt.show()
 masks = get_imgs(mask_files, mask = True)
@@ -170,7 +170,6 @@ for i in range(len(image_files)):
             axes[i].spines[j].set_visible(False)
 
         #plt.show()
-
     plt.savefig(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_val_{index + 1}.pdf', dpi =300)
 
     ground_truth = np.array(np.reshape(masks[index], (224,224,1)))
