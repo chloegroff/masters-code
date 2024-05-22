@@ -73,7 +73,7 @@ def generate_training(
             pbar.update(1)
 
 
-    #print('num training images with 0.1% white: ', index)
+    zero_point_five_white = index
     # Loops until desired number of images reached
     while index < num_images:
         flag = False
@@ -158,12 +158,21 @@ def generate_training(
         pbar.update(1)
         index += 1
     pbar.close()
+    print(zero_point_five_white)
+
+# if __name__ == '__main__':
+#     generate_training(image_path = r'C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks', 
+#                       save_path = r'C:\Users\chloe\DE4\Masters\Dataset\Training_Data_1plus', 
+#                       num_images = 448,
+#                       resolution = (224,224), 
+#                       prop_normal = 1, prop_rot = 0.5, prop_crop = 0.5, prop_zoom = 0, prop_warp = 0.5,
+#                       area_ratio = 0.01)
+
 
 if __name__ == '__main__':
-    generate_training(image_path = r'C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks', 
-                      save_path = r'C:\Users\chloe\DE4\Masters\Dataset\Training_Data_1plus', 
-                      num_images = 299,
+    generate_training(image_path = r'C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks_del8', 
+                      save_path = r'C:\Users\chloe\DE4\Masters\Dataset\Training_Data_no8', 
+                      num_images = 444, 
                       resolution = (224,224), 
                       prop_normal = 1, prop_rot = 0.5, prop_crop = 0.5, prop_zoom = 0, prop_warp = 0.5,
-                      area_ratio = 0.01)
-
+                      area_ratio = 0.005)

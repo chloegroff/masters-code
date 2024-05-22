@@ -60,12 +60,12 @@ def get_imgs(img_files: str, hls: bool = True, mask: bool = False, resolution: l
     return np.array(imgs, dtype= np.uint32)
 
 dim = 224
-val_image = r'C:\Users\chloe\DE4\Masters\Dataset\validation_imgs'
+val_image = r'C:\Users\chloe\DE4\Masters\Dataset\validation_imgs_small'
 image_files = glob.glob(val_image + sep +  '*_i.tif')
 mask_files = glob.glob(val_image + sep + '*_s.tif')
 
 # Define model numbers to compare
-models = [10,8,9,11]
+models = [10,8,9,11,13,]
 # Create a string of model numbers seperated by '_' e.g. '8_9_10'
 # models_str = ''
 # for i in range(len(models)-1):
@@ -137,7 +137,7 @@ for k, mask in enumerate(masks):
 
         #plt.show()
     fig.tight_layout()
-    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\Mask_{k}_compare_{number}.pdf', dpi =300)
+    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\Mask_{k}_compare_small_{number}.pdf', dpi =300)
 
     #ground_truth = np.array(np.reshape(mask[index], (224,224,1)))
     #ground_truth = masks[i]

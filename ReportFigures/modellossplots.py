@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import json 
 
-model_num = 8
+model_num = 14
 loss_func = 'Dice loss'
 with open(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_history.json', 'r') as f:
      history = json.load(f)
@@ -34,6 +34,15 @@ plt.xlabel('Epoch number')
 plt.legend(['train', 'val'], loc='upper left')
 plt.show()
 plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\Dice_{model_num}.pdf', dpi =300)
+
+plt.plot(history['History']['binary_accuracy'])
+plt.plot(history['History']['val_binary_accuracy'])
+plt.title(f'Model {model_num} Binary Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch number')
+plt.legend(['train', 'val'], loc='upper left')
+plt.show()
+plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\BinAcc{model_num}.pdf', dpi =300)
 
 print("Max dice coef:", round(max(history['History']['dice_coef']),4))
 print("Max dice coef:", round(max(history['History']['val_dice_coef']),4))

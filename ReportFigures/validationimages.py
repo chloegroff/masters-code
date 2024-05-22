@@ -183,7 +183,7 @@ for i in range(len(image_files)):
     index += 1
 
 
-with open(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_val.json', 'w') as f:
+with open(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_val_small.json', 'w') as f:
     json.dump(save_dict, f)
             
 
