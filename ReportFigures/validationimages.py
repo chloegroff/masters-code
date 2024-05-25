@@ -90,6 +90,10 @@ def get_imgs(img_files: str, hls: bool = True, mask: bool = False, resolution: l
         if hls and not mask:
             img = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
 
+        if np.size(img, 1) == 2464:
+            img = img[:,500:-600]
+            mask = mask[:,500:-600]
+
         scales = [resolution[0]/(img.shape[0]),resolution[1]/(img.shape[1]), 1]
         if mask:
             
@@ -106,15 +110,15 @@ def get_imgs(img_files: str, hls: bool = True, mask: bool = False, resolution: l
 
 
 
-model_num = 12
+model_num = 17
 model = rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}.keras'
 
-dim = 224
-val_image = r'C:\Users\chloe\DE4\Masters\Dataset\validation_imgs'
+dim = 512
+val_image = r'C:\Users\chloe\DE4\Masters\Dataset\validation_del8'
 # val_image_save = rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_example.pdf'
 
 #image_files = glob.glob(val_image + sep +  '*_i.tif')
-image_files = glob.glob(val_image + sep +  '*_i.tif')
+image_files = glob.glob(val_image + sep +  '*_8.jpg')
 mask_files = glob.glob(val_image + sep + '*_s.tif')
 
 #print(image_files)
@@ -123,10 +127,10 @@ mask_files = glob.glob(val_image + sep + '*_s.tif')
 
 loaded_model = keras.models.load_model(model, compile=False)
 
-images = get_imgs(image_files, hls = True)
+images = get_imgs(image_files, hls = False, resolution = [512,512])
 plt.imshow(images[0])
 plt.show()
-masks = get_imgs(mask_files, mask = True)
+masks = get_imgs(mask_files, mask = True, resolution = [512,512])
 
 result = loaded_model.predict(images / 255)
 result = result > 0.5
@@ -170,20 +174,21 @@ for i in range(len(image_files)):
             axes[i].spines[j].set_visible(False)
 
         #plt.show()
-    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_val_{index + 1}.pdf', dpi =300)
+    image_name = os.path.relpath(image_files[index], val_image)
+    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Dataset\validation_del8\Model_{model_num}_val_{image_name}.pdf', dpi =300)
 
-    ground_truth = np.array(np.reshape(masks[index], (224,224,1)))
+    ground_truth = np.array(np.reshape(masks[index], (512,512,1)))
     #ground_truth = masks[i]
     #prediction = np.array(np.reshape(result[i], (224,224,1)))
     prediction = result[index]
-    image_name = os.path.relpath(image_files[index], val_image)
+    #image_name = os.path.relpath(image_files[index], val_image)
     save_dict[image_name] = {
             'Dice coefficient': dice_coef(ground_truth, prediction)} 
 
     index += 1
 
 
-with open(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_val_small.json', 'w') as f:
+with open(rf'C:\Users\chloe\DE4\Masters\Dataset\validation_del8\Model_{model_num}_val_box8.json', 'w') as f:
     json.dump(save_dict, f)
             
 

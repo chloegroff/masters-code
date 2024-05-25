@@ -59,13 +59,13 @@ def get_imgs(img_files: str, hls: bool = True, mask: bool = False, resolution: l
 
     return np.array(imgs, dtype= np.uint32)
 
-dim = 224
-val_image = r'C:\Users\chloe\DE4\Masters\Dataset\validation_imgs_small'
-image_files = glob.glob(val_image + sep +  '*_i.tif')
+dim = 512
+val_image = r'C:\Users\chloe\DE4\Masters\Dataset\validation_del8'
+image_files = glob.glob(val_image + sep +  '*_8.jpg')
 mask_files = glob.glob(val_image + sep + '*_s.tif')
 
 # Define model numbers to compare
-models = [10,8,9,11,13,]
+models = [16,17]
 # Create a string of model numbers seperated by '_' e.g. '8_9_10'
 # models_str = ''
 # for i in range(len(models)-1):
@@ -73,15 +73,15 @@ models = [10,8,9,11,13,]
 # models.str = models_str + str(models[-1])
 # print(models_str)
 
-number = 1
+number = 2
 long_img = True
 
 predictions = []
 
-images = get_imgs(image_files, hls = False)
+images = get_imgs(image_files, hls = False, resolution=[512,512])
 plt.imshow(images[0])
 plt.show()
-masks = get_imgs(mask_files, mask = True)
+masks = get_imgs(mask_files, mask = True, resolution=[512,512])
 
 # Loops through each model specified to generate a prediction for an image
 for i, model in enumerate(models):
@@ -94,7 +94,7 @@ for i, model in enumerate(models):
 
 predictions = np.array(predictions)
 
-
+index = 0
 matplotlib.rcParams.update({'font.size': 12, "font.family": "Times New Roman"})
 
 # Loops through each validation image in folder
@@ -137,7 +137,9 @@ for k, mask in enumerate(masks):
 
         #plt.show()
     fig.tight_layout()
-    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\Mask_{k}_compare_small_{number}.pdf', dpi =300)
+    image_name = os.path.relpath(image_files[index], val_image)
+    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Dataset\validation_del8\{image_name}_compare_box8_{model[0]}_{model[1]}.pdf', dpi =300)
+    index += 1
 
     #ground_truth = np.array(np.reshape(mask[index], (224,224,1)))
     #ground_truth = masks[i]
