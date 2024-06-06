@@ -4,17 +4,23 @@ Can be used to split a train and validation data set or to make timelapse videos
 import os
 import glob
 import cv2
+from os.path import sep
 
 box_num = 8
 
-image_folder = r"C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks_del8"
-save_folder = r"C:\Users\chloe\DE4\Masters\Dataset\validation_box8"
+image_folder = rf"C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks_del{box_num}"
+save_folder = rf"C:\Users\chloe\DE4\Masters\Dataset\validation_del{box_num}"
 
-box8_img = glob.glob(r"C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks_del8\*_8.jpg")
+box_img = glob.glob(rf"C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks_del{box_num}\*_{box_num}.jpg")
 #box8_masks = glob.glob(r"C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks_del8\*_8_s.tif")
-print(len(box8_img))
+print(len(box_img))
 
-for i, filename in enumerate(box8_img):
+# Clears files in save directory
+prev_files = glob.glob(save_folder + sep + '*')
+for f in prev_files:
+        os.remove(f)
+
+for i, filename in enumerate(box_img):
         # Get path of file and associated mask
         img_path_rmv_jpg = filename.split('.')[0]
         mask_path = img_path_rmv_jpg + '_s.tif'
@@ -30,5 +36,5 @@ for i, filename in enumerate(box8_img):
         os.remove(filename)
         os.remove(mask_path)
 
-box8_img = glob.glob(r"C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks\*_8.jpg")
-print(len(box8_img))
+box_img = glob.glob(rf"C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks_del{box_num}\*_{box_num}.jpg")
+print(len(box_img))

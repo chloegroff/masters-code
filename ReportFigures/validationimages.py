@@ -3,6 +3,7 @@ import tensorflow as tf
 import matplotlib
 import matplotlib.image as Image
 from os.path import sep
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 import glob
 from scipy.ndimage import zoom
@@ -47,22 +48,28 @@ def mean_iou_loss(img, img2):
 #     union = keras.backend.sum(y_true, axis=[1,2,3]) + keras.backend.sum(y_pred, axis=[1,2,3])
 #     return keras.backend.mean( (2. * intersection + smooth) / (union + smooth), axis=0)
 
-def dice_coef(img, img2):
-        if img.shape != img2.shape:
-            raise ValueError("Shape mismatch: img and img2 must have to be of the same shape.")
-        else:
+# def dice_coef(img, img2):
+#         if img.shape != img2.shape:
+#             raise ValueError("Shape mismatch: img and img2 must have to be of the same shape.")
+#         else:
             
-            lenIntersection=0
+#             lenIntersection=0
             
-            for i in range(img.shape[0]):
-                for j in range(img.shape[1]):
-                    if ( np.array_equal(img[i][j],img2[i][j]) ):
-                        lenIntersection+=1
+#             for i in range(img.shape[0]):
+#                 for j in range(img.shape[1]):
+#                     if ( np.array_equal(img[i][j],img2[i][j]) ):
+#                         lenIntersection+=1
              
-            lenimg=img.shape[0]*img.shape[1]
-            lenimg2=img2.shape[0]*img2.shape[1]  
-            value = (2. * lenIntersection  / (lenimg + lenimg2))
-        return value
+#             lenimg=img.shape[0]*img.shape[1]
+#             lenimg2=img2.shape[0]*img2.shape[1]  
+#             value = (2. * lenIntersection  / (lenimg + lenimg2))
+#         return value
+
+def dice_coef(y_true, y_pred, smooth=1):
+    intersection = np.sum(y_true * y_pred)
+    union = np.sum(y_true) + np.sum(y_pred)
+    return np.mean(2. * intersection + smooth) / (union + smooth)
+
 
 # @keras.saving.register_keras_serializable()
 def dice_loss(in_gt, in_pred):
@@ -78,7 +85,7 @@ def dice_mean_iou(in_gt, in_pred):
 
 def get_imgs(img_files: str, hls: bool = True, mask: bool = False, resolution: list[int,int] = [224,224]) -> npt.NDArray:
     imgs = []
-    for i, img_file in enumerate(img_files):
+    for i, img_file in tqdm(enumerate(img_files)):
 
         if mask:
             img = cv2.imread(img_file, 0)    
@@ -109,87 +116,87 @@ def get_imgs(img_files: str, hls: bool = True, mask: bool = False, resolution: l
     return np.array(imgs, dtype= np.uint32)
 
 
+if __name__ == '__main__':
+    model_num = 17
+    model = rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}.keras'
 
-model_num = 17
-model = rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}.keras'
+    dim = 512
+    val_image = r'C:\Users\chloe\DE4\Masters\Dataset\validation_del8'
+    # val_image_save = rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_example.pdf'
 
-dim = 512
-val_image = r'C:\Users\chloe\DE4\Masters\Dataset\validation_del8'
-# val_image_save = rf'C:\Users\chloe\DE4\Masters\Models\Model_{model_num}_example.pdf'
+    #image_files = glob.glob(val_image + sep +  '*_i.tif')
+    image_files = glob.glob(val_image + sep +  '*_8.jpg')
+    mask_files = glob.glob(val_image + sep + '*_s.tif')
 
-#image_files = glob.glob(val_image + sep +  '*_i.tif')
-image_files = glob.glob(val_image + sep +  '*_8.jpg')
-mask_files = glob.glob(val_image + sep + '*_s.tif')
+    #print(image_files)
 
-#print(image_files)
+    # img = cv2.imread(images[0])
 
-# img = cv2.imread(images[0])
+    loaded_model = keras.models.load_model(model, compile=False)
 
-loaded_model = keras.models.load_model(model, compile=False)
+    images = get_imgs(image_files, hls = False, resolution = [512,512])
+    plt.imshow(images[0])
+    plt.show()
+    masks = get_imgs(mask_files, mask = True, resolution = [512,512])
 
-images = get_imgs(image_files, hls = False, resolution = [512,512])
-plt.imshow(images[0])
-plt.show()
-masks = get_imgs(mask_files, mask = True, resolution = [512,512])
-
-result = loaded_model.predict(images / 255)
-result = result > 0.5
-
-
-# model = load_model("aaaa.h5", compile=False)
-# model.compile(loss=custom_loss, optimizer='adam', metrics=custom_loss)
-# model.fit(...)
-index = 0
-save_dict = {}
-print(len(images))
-#for i in range(len(images) - 1):
-for i in range(len(image_files)):
-    print(masks[i].shape)
-    fig, axes = plt.subplots(ncols = 3, )
-    fig.set_figwidth(3.6)
-    fig.set_figheight(2)
-    axes[0].imshow(images[i])
-    axes[0].set_xlabel('Raw Image')
-    axes[1].imshow(np.reshape(masks[i]*255, (dim, dim)), cmap="gray")
-    axes[1].set_xlabel('Ground Truth')
-    axes[2].imshow(np.reshape(result[i]*255, (dim, dim)), cmap="gray")
-    axes[2].set_xlabel('Prediction')
-
-    matplotlib.rcParams.update({'font.size': 12, "font.family": "Times New Roman"})
-
-    for i, ax in enumerate(axes):
-        axes[i].tick_params(
-            axis='both',          # changes apply to the voth axis
-            which='both', 
-            left = False,   # both major and minor ticks are affected
-            right = False,
-            bottom=False,      # ticks along the bottom edge are off
-            top=False,         # ticks along the top edge are off
-            labelbottom=False) # labels along the bottom edge are off
-        
-        axes[i].xaxis.set_ticklabels([])
-        axes[i].yaxis.set_ticklabels([])
-
-        for j in ax.spines:
-            axes[i].spines[j].set_visible(False)
-
-        #plt.show()
-    image_name = os.path.relpath(image_files[index], val_image)
-    plt.savefig(rf'C:\Users\chloe\DE4\Masters\Dataset\validation_del8\Model_{model_num}_val_{image_name}.pdf', dpi =300)
-
-    ground_truth = np.array(np.reshape(masks[index], (512,512,1)))
-    #ground_truth = masks[i]
-    #prediction = np.array(np.reshape(result[i], (224,224,1)))
-    prediction = result[index]
-    #image_name = os.path.relpath(image_files[index], val_image)
-    save_dict[image_name] = {
-            'Dice coefficient': dice_coef(ground_truth, prediction)} 
-
-    index += 1
+    result = loaded_model.predict(images / 255)
+    result = result > 0.5
 
 
-with open(rf'C:\Users\chloe\DE4\Masters\Dataset\validation_del8\Model_{model_num}_val_box8.json', 'w') as f:
-    json.dump(save_dict, f)
+    # model = load_model("aaaa.h5", compile=False)
+    # model.compile(loss=custom_loss, optimizer='adam', metrics=custom_loss)
+    # model.fit(...)
+    index = 0
+    save_dict = {}
+    print(len(images))
+    #for i in range(len(images) - 1):
+    for i in range(len(image_files)):
+        print(masks[i].shape)
+        fig, axes = plt.subplots(ncols = 3, )
+        fig.set_figwidth(3.6)
+        fig.set_figheight(2)
+        axes[0].imshow(images[i])
+        axes[0].set_xlabel('Raw Image')
+        axes[1].imshow(np.reshape(masks[i]*255, (dim, dim)), cmap="gray")
+        axes[1].set_xlabel('Ground Truth')
+        axes[2].imshow(np.reshape(result[i]*255, (dim, dim)), cmap="gray")
+        axes[2].set_xlabel('Prediction')
+
+        matplotlib.rcParams.update({'font.size': 12, "font.family": "Times New Roman"})
+
+        for i, ax in enumerate(axes):
+            axes[i].tick_params(
+                axis='both',          # changes apply to the voth axis
+                which='both', 
+                left = False,   # both major and minor ticks are affected
+                right = False,
+                bottom=False,      # ticks along the bottom edge are off
+                top=False,         # ticks along the top edge are off
+                labelbottom=False) # labels along the bottom edge are off
             
+            axes[i].xaxis.set_ticklabels([])
+            axes[i].yaxis.set_ticklabels([])
 
-    
+            for j in ax.spines:
+                axes[i].spines[j].set_visible(False)
+
+            #plt.show()
+        image_name = os.path.relpath(image_files[index], val_image)
+        plt.savefig(rf'C:\Users\chloe\DE4\Masters\Dataset\validation_del8\Model_{model_num}_val_{image_name}.pdf', dpi =300)
+
+        ground_truth = np.array(np.reshape(masks[index], (512,512,1)))
+        #ground_truth = masks[i]
+        #prediction = np.array(np.reshape(result[i], (224,224,1)))
+        prediction = result[index]
+        #image_name = os.path.relpath(image_files[index], val_image)
+        save_dict[image_name] = {
+                'Dice coefficient': dice_coef(ground_truth, prediction)} 
+
+        index += 1
+
+
+    with open(rf'C:\Users\chloe\DE4\Masters\Dataset\validation_del8\Model_{model_num}_val_box8.json', 'w') as f:
+        json.dump(save_dict, f)
+                
+
+        

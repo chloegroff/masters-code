@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import json 
+import matplotlib
 
-model_num = [11, 14]
+model_num = [24, 21, 23]
 loss_func = ''
 history = {}
+
+matplotlib.rcParams.update({'font.size': 12, "font.family": "Times New Roman"})
 
 for i, model in enumerate(model_num):
     with open(rf'C:\Users\chloe\DE4\Masters\Models\Model_{model}_history.json', 'r') as f:
@@ -22,20 +25,25 @@ for i, model in enumerate(model_num):
 
     plt.plot(history[model_num[i]]['History']['val_loss'])
 
-plt.title(f'Model {model_num[0]} and {model_num[1]} Validation Loss')
+plt.title(f'Test Dice/IoU Loss')
 plt.ylabel(loss_func)
 plt.xlabel('Epoch number')
-plt.legend(['Model ' + str(model_num[0]), 'Model ' + str(model_num[1])], loc='upper left')
+plt.legend(['Training data: 94', 'Training data: 300', 'Training data: 500'], loc='upper left')
+# plt.legend(['Model ' + str(model_num[0]), 'Model ' + str(model_num[1]), 'Model ' + str(model_num[2]), 'Model ' + str(model_num[3])], loc='upper left')
+
+plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\augmentation_tuning.pdf', dpi =300)
 plt.show()
-#plt.savefig(rf'C:\Users\chloe\DE4\Masters\Figures\Loss_{model_num[0]}_{model_num[1]}.pdf', dpi =300)
+
 for i, model in enumerate(model_num):
     plt.plot(history[model_num[i]]['History']['val_binary_accuracy'])
 
 plt.title(f'Model {model_num[0]} and {model_num[1]} Validation Binary Accuracy')
 plt.ylabel('Binary Accuracy')
 plt.xlabel('Epoch number')
-plt.legend(['Model ' + str(model_num[0]), 'Model ' + str(model_num[1])], loc='upper left')
+plt.legend(['Training data: 94', 'Training data: 300', 'Training data: 500'], loc='upper left')
+# plt.legend(['Model ' + str(model_num[0]), 'Model ' + str(model_num[1]), 'Model ' + str(model_num[2]), 'Model ' + str(model_num[3])], loc='upper left')
 plt.show()
+
 # plt.plot(history['History']['dice_coef'])
 # plt.plot(history['History']['val_dice_coef'])
 # plt.title(f'Model {model_num} Dice Coefficent')

@@ -15,7 +15,8 @@ from scipy.ndimage import gaussian_filter
 def generate_training(
         image_path: str, save_path: str, num_images: int, resolution: tuple[int, int], prop_normal: float,
         prop_rot: float, prop_crop: float, prop_zoom: float, prop_warp: float, area_ratio: float,
-        zoom_range: tuple[int, int] = (0.5, 3), crop_range: tuple[int, int] = [0.1, 0.6]
+        zoom_range: tuple[int, int] = (0.5, 3), crop_range: tuple[int, int] = [0.1, 0.6], image_files = None, 
+        mask_files = None
         ):
     
     # Clears files in save directory
@@ -24,8 +25,9 @@ def generate_training(
         remove(f)
     
     # Gets mask and image files
-    img_files = glob(image_path + sep + '*.jpg')
-    mask_files = glob(image_path + sep + '*_s.*')
+    if image_files is None:
+        img_files = glob(image_path + sep + '*.jpg')
+        mask_files = glob(image_path + sep + '*_s.*')
 
     # Takes last few charactaers of each mask path
     mask_stamps = [i[:-6] for i in mask_files]
@@ -170,9 +172,12 @@ def generate_training(
 
 
 if __name__ == '__main__':
+
+    
+
     generate_training(image_path = r'C:\Users\chloe\DE4\Masters\Dataset\allImagesMasks_del8', 
-                      save_path = r'C:\Users\chloe\DE4\Masters\Dataset\Training_Data_no8', 
-                      num_images = 444, 
+                      save_path = r"C:\Users\chloe\DE4\Masters\Dataset\Training_Data_no8", 
+                      num_images = 746, 
                       resolution = (224,224), 
                       prop_normal = 1, prop_rot = 0.5, prop_crop = 0.5, prop_zoom = 0, prop_warp = 0.5,
-                      area_ratio = 0.005)
+                      area_ratio = 0.001)
